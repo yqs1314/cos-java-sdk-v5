@@ -26,7 +26,9 @@ import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import com.qcloud.cos.transfer.TransferManager;
 import com.qcloud.cos.transfer.Upload;
 
-
+/**
+ * 基础图片处理相关demo  相关API https://cloud.tencent.com/document/product/460/36540
+ */
 public class ImagePersistenceDemo {
     public static void persistenceImage(COSClient cosClient) {
         // bucket名需包含appid
@@ -55,7 +57,6 @@ public class ImagePersistenceDemo {
             PutObjectResult putObjectResult = cosClient.putObject(putObjectRequest);
             CIUploadResult ciUploadResult = putObjectResult.getCiUploadResult();
             System.out.println(putObjectResult.getRequestId());
-            System.out.println(ciUploadResult.getOriginalInfo().getEtag());
             for(CIObject ciObject:ciUploadResult.getProcessResults().getObjectList()) {
                 System.out.println(ciObject.getLocation());
                 System.out.println(ciObject.getEtag());
@@ -157,6 +158,9 @@ public class ImagePersistenceDemo {
         }
     }
 
+    /**
+     * 云上图片处理
+     */
     public static void persistenceImagePost(COSClient cosClient) {
         String bucketName = "examplebucket-1250000000";
         String key = "test.jpg";

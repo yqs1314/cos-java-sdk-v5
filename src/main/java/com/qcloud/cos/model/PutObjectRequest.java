@@ -79,6 +79,9 @@ import java.io.InputStream;
  *      ObjectMetadata)
  */
 public class PutObjectRequest extends AbstractPutObjectRequest implements Serializable {
+    private boolean enableResumableUpload = false;
+
+    private boolean hasDonePreflight = false;
     /**
      * Constructs a new
      * {@link PutObjectRequest} object to upload a file to the
@@ -227,5 +230,20 @@ public class PutObjectRequest extends AbstractPutObjectRequest implements Serial
             SSECOSKeyManagementParams sseCOSKeyManagementParams) {
         return super.withSSECOSKeyManagementParams(sseCOSKeyManagementParams);
     }
-    
+
+    public void setEnableResumableUpload(boolean useResumableUpload) {
+        enableResumableUpload = useResumableUpload;
+    }
+
+    public boolean isEnableResumableUpload() {
+        return enableResumableUpload;
+    }
+
+    public boolean hasDonePreflight() {
+        return hasDonePreflight;
+    }
+
+    public void setHasDonePreflight(boolean hasDonePreflight) {
+        this.hasDonePreflight = hasDonePreflight;
+    }
 }

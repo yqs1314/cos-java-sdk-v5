@@ -11,7 +11,7 @@
  * on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
  * express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
- 
+
  * According to cos feature, we modify some class，comment, field name, etc.
  */
 
@@ -19,11 +19,17 @@
 package com.qcloud.cos.http;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.qcloud.cos.auth.COSCredentials;
 import com.qcloud.cos.event.ProgressListener;
+import com.qcloud.cos.exception.ExceptionLogDetail;
+import com.qcloud.cos.internal.CosClientAbortTaskMonitor;
 import com.qcloud.cos.internal.CosServiceRequest;
+import com.qcloud.cos.internal.DefaultClientAbortTaskImpl;
 
 public class CosHttpRequest<T extends CosServiceRequest> {
 
@@ -50,8 +56,19 @@ public class CosHttpRequest<T extends CosServiceRequest> {
     
     private ProgressListener progressListener;
 
+    private String ciSpecialEndParameter;
+
+    private String bucketName;
+
+    private COSCredentials cosCredentials;
+
+    private List<ExceptionLogDetail> logDetails = new ArrayList<ExceptionLogDetail>();
+
+    private CosClientAbortTaskMonitor clientAbortTaskMonitor = DefaultClientAbortTaskImpl.INSTANCE;
+
     public CosHttpRequest(T originRequest) {
         this.originRequest = originRequest;
+        this.ciSpecialEndParameter = originRequest.getCiSpecialEndParameter();
     }
 
     public void addHeader(String name, String value) {
@@ -135,6 +152,46 @@ public class CosHttpRequest<T extends CosServiceRequest> {
 
     public void setProgressListener(ProgressListener progressListener) {
         this.progressListener = progressListener;
+    }
+
+    public String getCiSpecialEndParameter() {
+        return ciSpecialEndParameter;
+    }
+
+    public void setCiSpecialEndParameter(String ciSpecialEndParameter) {
+        this.ciSpecialEndParameter = ciSpecialEndParameter;
+    }
+
+    public String getBucketName() {
+        return bucketName;
+    }
+
+    public void setBucketName(String bucketName) {
+        this.bucketName = bucketName;
+    }
+
+    public COSCredentials getCosCredentials() {
+        return cosCredentials;
+    }
+
+    public void setCosCredentials(COSCredentials cosCredentials) {
+        this.cosCredentials = cosCredentials;
+    }
+
+    public void addLogDetails(ExceptionLogDetail logDetail) {
+        logDetails.add(logDetail);
+    }
+
+    public List<ExceptionLogDetail> getExceptionsLogDetails() {
+        return logDetails;
+    }
+
+    public CosClientAbortTaskMonitor getClientAbortTaskMonitor() {
+        return clientAbortTaskMonitor;
+    }
+
+    public void setClientAbortTaskMonitor(CosClientAbortTaskMonitor clientAbortTaskMonitor) {
+        this.clientAbortTaskMonitor = clientAbortTaskMonitor;
     }
 
     @Override

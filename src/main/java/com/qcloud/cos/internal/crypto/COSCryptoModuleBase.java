@@ -122,18 +122,18 @@ public abstract class COSCryptoModuleBase extends COSCryptoModule {
         this.contentCryptoScheme.setIV(cryptoConfig.getIV());
     }
 
-    /**
-     * For testing purposes only.
-     */
-    protected COSCryptoModuleBase(COSDirect cos, COSCredentialsProvider credentialsProvider,
-            EncryptionMaterialsProvider kekMaterialsProvider, CryptoConfiguration cryptoConfig) {
-        this.kekMaterialsProvider = kekMaterialsProvider;
-        this.cos = cos;
-        this.cryptoConfig = cryptoConfig;
-        this.cryptoScheme = COSCryptoScheme.from(cryptoConfig.getCryptoMode());
-        this.contentCryptoScheme = cryptoScheme.getContentCryptoScheme();
-        this.kms = null;
-    }
+//    /**
+//     * For testing purposes only.
+//     */
+//    protected COSCryptoModuleBase(COSDirect cos, COSCredentialsProvider credentialsProvider,
+//            EncryptionMaterialsProvider kekMaterialsProvider, CryptoConfiguration cryptoConfig) {
+//        this.kekMaterialsProvider = kekMaterialsProvider;
+//        this.cos = cos;
+//        this.cryptoConfig = cryptoConfig;
+//        this.cryptoScheme = COSCryptoScheme.from(cryptoConfig.getCryptoMode());
+//        this.contentCryptoScheme = cryptoScheme.getContentCryptoScheme();
+//        this.kms = null;
+//    }
 
     /**
      * Returns the length of the ciphertext computed from the length of the plaintext.
@@ -235,13 +235,8 @@ public abstract class COSCryptoModuleBase extends COSCryptoModule {
             long dataSize = req.getDataSize();
             long partSize = req.getPartSize();
 
-            if (dataSize < 0 || partSize < 0) {
-                throw new CosClientException("initiate multipart upload with encryption client must set dataSize and partSize");
-            }
-
-            if (partSize % 16 != 0) {
-                throw new CosClientException("initiat multipart uplaod with encryption client must set part size a mutiple of 16"
-                    + "but got " + partSize);
+            if (partSize < 0) {
+                throw new CosClientException("initiate multipart upload with encryption client must set partSize");
             }
 
             metadata.addUserMetadata(Headers.ENCRYPTION_DATA_SIZE, Long.toString(dataSize));

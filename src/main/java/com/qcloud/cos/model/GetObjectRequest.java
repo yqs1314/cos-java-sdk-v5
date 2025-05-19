@@ -85,6 +85,8 @@ public class GetObjectRequest extends CosServiceRequest
      */
     private SSECustomerKey sseCustomerKey;
 
+    private int downloadPartsThreads = 1;
+
     public GetObjectRequest(COSObjectId cosObjectId) {
         this(cosObjectId.getBucket(), cosObjectId.getKey(), cosObjectId.getVersionId());
     }
@@ -325,6 +327,20 @@ public class GetObjectRequest extends CosServiceRequest
      */
     public void setRange(long start, long end) {
         range = new long[] {start, end};
+    }
+
+    public void setRangeStart(long start) {
+        if (start < 0) {
+            throw new IllegalArgumentException("The range start should be greater than or equal to 0");
+        }
+        range = new long[] {start, -1L};
+    }
+
+    public void setRangeEnd(long end) {
+        if (end < 0) {
+            throw new IllegalArgumentException("The range end should be greater than or equal to 0");
+        }
+        range = new long[] {-1L, end};
     }
 
     /**
@@ -638,5 +654,13 @@ public class GetObjectRequest extends CosServiceRequest
 
     public void setTrafficLimit(int trafficLimit) {
         this.trafficLimit = trafficLimit;
+    }
+
+    public void setDownloadPartsThreads(int downloadThreads) {
+        this.downloadPartsThreads = downloadThreads;
+    }
+
+    public int getDownloadPartsThreads() {
+        return downloadPartsThreads;
     }
 }

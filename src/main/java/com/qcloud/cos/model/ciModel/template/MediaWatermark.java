@@ -1,5 +1,7 @@
 package com.qcloud.cos.model.ciModel.template;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 /**
  * 水印模板实体类 参数详情见:https://cloud.tencent.com/document/product/460/48176
  */
@@ -7,40 +9,59 @@ public class MediaWatermark {
     /**
      * 水印类型 Text：文字水印 Image：图片水印
      */
+    @XStreamAlias("Type")
     private String type;
+
     /**
      * 偏移方式 Relativity：按比例 Absolute：固定位置
      */
+    @XStreamAlias("LocMode")
     private String locMode;
+
     /**
      * 水平偏移
      */
+    @XStreamAlias("Dx")
     private String dx;
+
     /**
      * 垂直偏移
      */
+    @XStreamAlias("Dy")
     private String dy;
+
     /**
      * 基准位置
      */
+    @XStreamAlias("Pos")
     private String pos;
+
     /**
      * 水印开始时间
      */
+    @XStreamAlias("StartTime")
     private String startTime;
+
     /**
      * 水印结束时间
      */
+    @XStreamAlias("EndTime")
     private String endTime;
+
     /**
      * 水印text节点
      */
+    @XStreamAlias("Text")
     private MediaWaterMarkText text;
 
     /**
      * 水印图片节点
      */
+    @XStreamAlias("Image")
     private MediaWaterMarkImage image;
+
+    @XStreamAlias("SlideConfig")
+    private SlideConfig slideConfig;
 
     public String getType() {
         return type;
@@ -99,7 +120,7 @@ public class MediaWatermark {
     }
 
     public MediaWaterMarkText getText() {
-        if (text==null){
+        if (text == null) {
             text = new MediaWaterMarkText();
         }
         return text;
@@ -110,7 +131,7 @@ public class MediaWatermark {
     }
 
     public MediaWaterMarkImage getImage() {
-        if (image==null){
+        if (image == null) {
             image = new MediaWaterMarkImage();
         }
         return image;
@@ -118,6 +139,17 @@ public class MediaWatermark {
 
     public void setImage(MediaWaterMarkImage image) {
         this.image = image;
+    }
+
+    public SlideConfig getSlideConfig() {
+        if (slideConfig == null) {
+            slideConfig = new SlideConfig();
+        }
+        return slideConfig;
+    }
+
+    public void setSlideConfig(SlideConfig slideConfig) {
+        this.slideConfig = slideConfig;
     }
 
     @Override

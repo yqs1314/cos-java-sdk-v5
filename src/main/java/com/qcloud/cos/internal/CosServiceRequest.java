@@ -24,9 +24,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.qcloud.cos.auth.COSCredentials;
 import com.qcloud.cos.event.ProgressListener;
 
+@JsonFilter("CosServiceFilter")
 public class CosServiceRequest implements Cloneable, ReadLimitInfo  {
     /**
      * Request related key information
@@ -59,6 +61,7 @@ public class CosServiceRequest implements Cloneable, ReadLimitInfo  {
      */
     private CosServiceRequest cloneSource;
 
+    private String ciSpecialEndParameter;
     /**
      * Sets the optional progress listener for receiving updates about the progress of the request.
      *
@@ -271,5 +274,13 @@ public class CosServiceRequest implements Cloneable, ReadLimitInfo  {
 
     public void setCosCredentials(COSCredentials cosCredentials) {
         this.cosCredentials = cosCredentials;
+    }
+
+    public String getCiSpecialEndParameter() {
+        return ciSpecialEndParameter;
+    }
+
+    public void setCiSpecialEndParameter(String ciSpecialEndParameter) {
+        this.ciSpecialEndParameter = ciSpecialEndParameter;
     }
 }

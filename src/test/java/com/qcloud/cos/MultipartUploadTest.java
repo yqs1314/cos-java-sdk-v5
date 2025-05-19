@@ -7,16 +7,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.qcloud.cos.model.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.qcloud.cos.exception.CosServiceException;
-import com.qcloud.cos.model.AbortMultipartUploadRequest;
-import com.qcloud.cos.model.ListMultipartUploadsRequest;
-import com.qcloud.cos.model.MultipartUpload;
-import com.qcloud.cos.model.MultipartUploadListing;
 
 public class MultipartUploadTest extends AbstractCOSClientTest {
 
@@ -63,19 +60,29 @@ public class MultipartUploadTest extends AbstractCOSClientTest {
         if (!judgeUserInfoValid()) {
             return;
         }
-        String key = "ut/testListMultipart.txt";
-        String uploadId = testInitMultipart(key);
+        String key1 = "ut/testListMultipart1.txt";
+        InitiateMultipartUploadRequest initiateMultipartUploadRequest1 = new InitiateMultipartUploadRequest(bucket, key1);
+        String uploadId = testInitMultipart(initiateMultipartUploadRequest1);
+
+        String key2 = "ut/testListMultipart2.txt";
+        InitiateMultipartUploadRequest initiateMultipartUploadRequest2 = new InitiateMultipartUploadRequest(bucket, key2);
+        String uploadId2 = testInitMultipart(initiateMultipartUploadRequest2);
+
         ListMultipartUploadsRequest listMultipartUploadsRequest =
                 new ListMultipartUploadsRequest(bucket);
         listMultipartUploadsRequest.setMaxUploads(100);
         listMultipartUploadsRequest.setPrefix("ut/");
+        listMultipartUploadsRequest.setKeyMarker("ut/testListMultipart1.txt");
+        listMultipartUploadsRequest.setDelimiter("/");
+        listMultipartUploadsRequest.setEncodingType("url");
+        listMultipartUploadsRequest.setUploadIdMarker(uploadId);
         while (true) {
             MultipartUploadListing multipartUploadListing =
                     cosclient.listMultipartUploads(listMultipartUploadsRequest);
             List<MultipartUpload> multipartUploads = multipartUploadListing.getMultipartUploads();
             for (MultipartUpload mUpload : multipartUploads) {
-                if (mUpload.getUploadId().equals(uploadId)) {
-                    assertEquals(key, mUpload.getKey());
+                if (mUpload.getUploadId().equals(uploadId2)) {
+                    assertEquals(key2, mUpload.getKey());
                     return;
                 }
             }
@@ -93,7 +100,8 @@ public class MultipartUploadTest extends AbstractCOSClientTest {
             return;
         }
         String key = "ut/testAbortMultipart.txt";
-        String uploadId = testInitMultipart(key);
+        InitiateMultipartUploadRequest initiateMultipartUploadRequest = new InitiateMultipartUploadRequest(bucket, key);
+        String uploadId = testInitMultipart(initiateMultipartUploadRequest);
         AbortMultipartUploadRequest abortMultipartUploadRequest = new AbortMultipartUploadRequest(bucket, key, uploadId);
         cosclient.abortMultipartUpload(abortMultipartUploadRequest);
         try {

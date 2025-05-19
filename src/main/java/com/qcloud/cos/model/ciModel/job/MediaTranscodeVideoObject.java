@@ -1,5 +1,7 @@
 package com.qcloud.cos.model.ciModel.job;
 
+import com.thoughtworks.xstream.annotations.XStreamAlias;
+
 /**
  * 媒体处理 任务转码实体 https://cloud.tencent.com/document/product/460/48234
  */
@@ -7,51 +9,74 @@ public class MediaTranscodeVideoObject extends MediaVideoCommon {
     /**
      * 是否删除视频流
      */
+    @XStreamAlias("Remove")
     private String remove;
     /**
      * 编码级别
      */
+    @XStreamAlias("Profile")
     private String profile;
     /**
      * 视频输出文件的码率
      */
+    @XStreamAlias("Bitrate")
     private String bitrate;
     /**
      * 码率-质量控制因子
      */
+    @XStreamAlias("Crf")
     private String crf;
     /**
      * 关键帧间最大帧数
      */
+    @XStreamAlias("Gop")
     private String gop;
     /**
      * 视频算法器预置
      */
+    @XStreamAlias("Preset")
     private String preset;
     /**
      * 缓冲区大小
      */
+    @XStreamAlias("BufSize")
     private String bufSize;
     /**
      * 视频码率峰值
      */
+    @XStreamAlias("Maxrate")
     private String maxrate;
 
+    @XStreamAlias("ScanMode")
     private String scanMode;
 
     /**
      * 视频颜色格式
      */
+    @XStreamAlias("PixFmt")
     private String pixfmt;
     /**
      * 长短边自适应
      */
+    @XStreamAlias("LongShortMode")
     private String longShortMode;
     /**
      * 旋转角度
      */
+    @XStreamAlias("Rotate")
     private String rotate;
 
+    @XStreamAlias("ColorParam")
+    private String colorParam;
+
+    @XStreamAlias("Interlaced")
+    private String interlaced;
+
+    @XStreamAlias("Crop")
+    private String crop;
+
+    @XStreamAlias("Roi")
+    private String roi;
 
     public String getRemove() {
         return remove;
@@ -148,6 +173,38 @@ public class MediaTranscodeVideoObject extends MediaVideoCommon {
 
     public void setRotate(String rotate) {
         this.rotate = rotate;
+    }
+
+    public String getColorParam() {
+        return colorParam;
+    }
+
+    public void setColorParam(String colorParam) {
+        this.colorParam = colorParam;
+    }
+
+    public String getInterlaced() {
+        return interlaced;
+    }
+
+    public void setInterlaced(String interlaced) {
+        this.interlaced = interlaced;
+    }
+
+    public String getCrop() {
+        return crop;
+    }
+
+    public void setCrop(String crop) {
+        this.crop = crop;
+    }
+
+    public String getRoi() {
+        return roi;
+    }
+
+    public void setRoi(String roi) {
+        this.roi = roi;
     }
 
     @Override

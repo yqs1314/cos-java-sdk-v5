@@ -27,6 +27,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.qcloud.cos.model.bucketcertificate.BucketDomainCertificateRequest;
+import com.qcloud.cos.model.bucketcertificate.BucketGetDomainCertificate;
+import com.qcloud.cos.model.bucketcertificate.BucketPutDomainCertificate;
+import com.qcloud.cos.model.bucketcertificate.SetBucketDomainCertificateRequest;
+import com.qcloud.cos.model.ciModel.ai.*;
+import com.qcloud.cos.model.ciModel.common.CImageProcessRequest;
+import com.qcloud.cos.model.ciModel.hls.*;
 import com.qcloud.cos.model.ciModel.image.*;
 import com.qcloud.cos.exception.CosClientException;
 import com.qcloud.cos.exception.CosServiceException;
@@ -40,18 +47,14 @@ import com.qcloud.cos.model.ciModel.bucket.DocBucketResponse;
 import com.qcloud.cos.model.ciModel.bucket.MediaBucketRequest;
 import com.qcloud.cos.model.ciModel.bucket.MediaBucketResponse;
 import com.qcloud.cos.model.ciModel.common.ImageProcessRequest;
-import com.qcloud.cos.model.ciModel.job.DocHtmlRequest;
-import com.qcloud.cos.model.ciModel.job.DocJobListRequest;
-import com.qcloud.cos.model.ciModel.job.DocJobListResponse;
-import com.qcloud.cos.model.ciModel.job.DocJobRequest;
-import com.qcloud.cos.model.ciModel.job.DocJobResponse;
-import com.qcloud.cos.model.ciModel.job.MediaJobResponse;
-import com.qcloud.cos.model.ciModel.job.MediaJobsRequest;
-import com.qcloud.cos.model.ciModel.job.MediaListJobResponse;
+import com.qcloud.cos.model.ciModel.job.*;
+import com.qcloud.cos.model.ciModel.job.v2.*;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoRequest;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoResponse;
+import com.qcloud.cos.model.ciModel.metaInsight.*;
+import com.qcloud.cos.model.ciModel.persistence.AIGameRecResponse;
 import com.qcloud.cos.model.ciModel.persistence.CIUploadResult;
-import com.qcloud.cos.model.ciModel.persistence.DetectCarRequest;
+import com.qcloud.cos.model.ciModel.persistence.AIRecRequest;
 import com.qcloud.cos.model.ciModel.persistence.DetectCarResponse;
 import com.qcloud.cos.model.ciModel.queue.DocListQueueResponse;
 import com.qcloud.cos.model.ciModel.queue.DocQueueRequest;
@@ -75,7 +78,6 @@ import com.qcloud.cos.model.fetch.GetAsyncFetchTaskResult;
 import com.qcloud.cos.model.fetch.PutAsyncFetchTaskRequest;
 import com.qcloud.cos.model.fetch.PutAsyncFetchTaskResult;
 import com.qcloud.cos.model.inventory.InventoryConfiguration;
-import com.squareup.okhttp.internal.http.HttpMethod;
 
 
 public interface COS extends COSDirectSpi {
@@ -374,6 +376,28 @@ public interface COS extends COSDirectSpi {
      */
     public ObjectMetadata getObject(GetObjectRequest getObjectRequest, File destinationFile)
             throws CosClientException, CosServiceException;
+
+    /**
+     * <p>
+     *     Create a Symlink for the specified object.
+     *     The <code>PutSymlinkRequest</code> contains all the details of the request, including the bucket created to,
+     *     the symLink name referred to the target object, the target object key.
+     * <p/>
+     * @param putSymlinkRequest the request object containing all the parameter to create a symlink.
+     * @return the result creating symlink.
+     */
+    public PutSymlinkResult putSymlink(PutSymlinkRequest putSymlinkRequest);
+
+    /**
+     * <p>
+     *     Get the object the symbolic link actually points to.
+     *     The <code>GetSymlinkRequest</code> contains all the details of the request, including the bucket created to,
+     *     the symbolic link queried.
+     * </p>
+     * @param getSymlinkRequest the request object containing all the parameter to get a symlink.
+     * @return the target the symbolic link referred to.
+     */
+    public GetSymlinkResult getSymlink(GetSymlinkRequest getSymlinkRequest);
 
     /**
      * @param bucketName Name of bucket that presumably contains object
@@ -2408,7 +2432,7 @@ public interface COS extends COSDirectSpi {
      * @throws CosServiceException If any errors occurred in COS while processing the
      *                             request.
      */
-    public void deleteBucketDomainConfiguration(DeleteBucketDomainConfigurationRequest deleteBucketDomainConfigurationReqeuest)
+    public void deleteBucketDomainConfiguration(DeleteBucketDomainConfigurationRequest deleteBucketDomainConfigurationRequest)
             throws CosClientException, CosServiceException;
 
     /**
@@ -2462,6 +2486,86 @@ public interface COS extends COSDirectSpi {
      * @throws CosServiceException If any errors occurred in COS while processing the request.
      */
     public BucketDomainConfiguration getBucketDomainConfiguration(GetBucketDomainConfigurationRequest getBucketDomainConfigurationRequest)
+            throws CosClientException, CosServiceException;
+
+    /**
+     * This operation removes the domain certificate for a bucket.
+     *
+     * @param bucketName The name of the bucket whose domain certificate is being
+     *                   deleted.
+     * @parm domainName The name of the bucket's domain whose certificate is being deleted.
+     * @throws CosClientException  If any errors are encountered on the client while making the
+     *                             request or handling the response.
+     * @throws CosServiceException If any errors occurred in COS while processing the
+     *                             request.
+     */
+    public void deleteBucketDomainCertificate(String bucketName,String domainName)
+            throws CosClientException, CosServiceException;
+
+    /**
+     * This operation removes the domain certificate for a bucket.
+     *
+     * @param deleteBucketDomainCertificateRequest The request object specifying the name of the bucket whose
+     *                                               domain certificate is to be deleted.
+     * @throws CosClientException  If any errors are encountered on the client while making the
+     *                             request or handling the response.
+     * @throws CosServiceException If any errors occurred in COS while processing the
+     *                             request.
+     */
+    public void deleteBucketDomainCertificate(BucketDomainCertificateRequest deleteBucketDomainCertificateRequest)
+            throws CosClientException, CosServiceException;
+    /**
+     * Sets the domain certificate for the specified bucket.
+     *
+     * @param bucketName    The name of the bucket whose domain certificate is being set.
+     * @param domainCertificate The certificate describing the specified bucket custom domain
+     * @throws CosClientException  If any errors are encountered on the client while making the
+     *                             request or handling the response.
+     * @throws CosServiceException If any errors occurred in COS while processing the request.
+     */
+    public void setBucketDomainCertificate(String bucketName, BucketPutDomainCertificate domainCertificate)
+            throws CosClientException, CosServiceException;
+
+    /**
+     * Sets the domain certificate for the specified bucket.
+     *
+     * @param setBucketDomainCertificateRequest The request object containing the name of the bucket whose
+     *                                            domain certificate is being updated, and the new domain
+     *                                            certificate values.
+     * @throws CosClientException  If any errors are encountered on the client while making the
+     *                             request or handling the response.
+     * @throws CosServiceException If any errors occurred in COS while processing the request.
+     */
+    public void setBucketDomainCertificate(SetBucketDomainCertificateRequest setBucketDomainCertificateRequest)
+            throws CosClientException, CosServiceException;
+
+    /**
+     * Returns the domain certificate for the specified bucket.
+     *
+     * @param bucketName The name of the bucket whose domain certificate is being retrieved.
+     * @param domainName The name of the bucket's domain whose certificate is being retrieved.
+     * @return The bucket domain certificate for the specified bucket,
+     * otherwise null if there is no domain certificate set for the
+     * specified bucket.
+     * @throws CosClientException  If any errors are encountered on the client while making the
+     *                             request or handling the response.
+     * @throws CosServiceException If any errors occurred in COS while processing the request.
+     */
+    public BucketGetDomainCertificate getBucketDomainCertificate(String bucketName, String domainName)
+            throws CosClientException, CosServiceException;
+
+    /**
+     * Returns the domain certificate for the specified bucket.
+     *
+     * @param getBucketDomainCertificateRequest The request object for retrieving the bucket domain certificate.
+     * @return The bucket domain certificate for the specified bucket,
+     * otherwise null if there is no domain certificate set for the
+     * specified bucket.
+     * @throws CosClientException  If any errors are encountered on the client while making the
+     *                             request or handling the response.
+     * @throws CosServiceException If any errors occurred in COS while processing the request.
+     */
+    public BucketGetDomainCertificate getBucketDomainCertificate(BucketDomainCertificateRequest getBucketDomainCertificateRequest)
             throws CosClientException, CosServiceException;
 
     /**
@@ -2802,7 +2906,9 @@ public interface COS extends COSDirectSpi {
      *
      * @param req
      */
-    MediaJobResponse createMediaJobs(MediaJobsRequest req) throws UnsupportedEncodingException;
+    MediaJobResponse createMediaJobs(MediaJobsRequest req) ;
+
+    MediaJobResponseV2 createMediaJobsV2(MediaJobsRequestV2 req);
 
     /**
      * CancelMediaJob 接口用于取消一个任务。  https://cloud.tencent.com/document/product/460/38939
@@ -2994,10 +3100,12 @@ public interface COS extends COSDirectSpi {
      */
     Boolean createDocProcessBucket(DocBucketRequest request);
 
+    Boolean createMediaProcessBucket(MediaBucketRequest mediaBucketRequest);
+
     /**
      * GenerateDocPreviewHtmlUrl  查询账号下已开通文档预览功能的bucket
      */
-    String GenerateDocPreviewUrl(DocHtmlRequest docJobRequest) throws URISyntaxException;
+    String generateDocPreviewUrl(DocHtmlRequest docJobRequest) throws URISyntaxException;
 
     /**
      * createWebpageAuditingJob  提交网页审核任务 https://cloud.tencent.com/document/product/460/63968
@@ -3009,15 +3117,17 @@ public interface COS extends COSDirectSpi {
      */
     WebpageAuditingResponse describeWebpageAuditingJob(WebpageAuditingRequest request);
 
+    @Deprecated
     PutAsyncFetchTaskResult putAsyncFetchTask(PutAsyncFetchTaskRequest request);
 
+    @Deprecated
     GetAsyncFetchTaskResult getAsyncFetchTask(GetAsyncFetchTaskRequest request);
 
     ImageAuditingResponse describeAuditingImageJob(DescribeImageAuditingRequest imageAuditingRequest);
 
     PrivateM3U8Response getPrivateM3U8(PrivateM3U8Request request);
 
-    DetectCarResponse detectCar(DetectCarRequest request);
+    DetectCarResponse detectCar(AIRecRequest request);
 
     boolean openImageSearch(OpenImageSearchRequest imageSearchRequest);
 
@@ -3030,6 +3140,160 @@ public interface COS extends COSDirectSpi {
     MediaWorkflowListResponse triggerWorkflowList(MediaWorkflowListRequest request);
 
     InputStream getSnapshot(CosSnapshotRequest request);
+
+    String generateQrcode(GenerateQrcodeRequest request);
+
+    Boolean addImageStyle(ImageStyleRequest request);
+
+    ImageStyleResponse getImageStyle(ImageStyleRequest request);
+
+    Boolean deleteImageStyle(ImageStyleRequest request);
+
+    String getObjectDecompressionStatus(String bucketName, String objectKey);
+
+    String reportBadCase(ReportBadCaseRequest reportBadCaseRequest);
+
+    /**
+     *提交一个解压任务
+     * @param decompressionRequest 解压请求体
+     * @return 解压状态
+     */
+    DecompressionResult postObjectDecompression(DecompressionRequest decompressionRequest);
+
+
+    /**
+     * 查询解压任务的状态
+     * @param bucketName 桶名
+     * @param objectKey 对象的key
+     * @param jobId 指定jobId（可以是null）
+     * @return 解压状态
+     */
+    DecompressionResult getObjectDecompressionStatus(String bucketName, String objectKey, String jobId);
+
+    /**
+     * 列出解压缩任务列表.
+     * @param bucketName 桶名称
+     * @param jobStatus 支持Running|Success|Failed|Pending等选项进行查询过滤（可以是null）
+     * @param sortType 支持asc/dsc两个选项， 分别代表升序和降序（可以是null）
+     * @param maxResults 每一页最多列出的项数（可以是null）
+     * @param nextToken 可选项，用于翻页（可以是null）
+     * @return 解压缩任务列表
+     */
+    ListJobsResult listObjectDecompressionJobs(String bucketName, String jobStatus, String sortType, String maxResults, String nextToken);
+
+    MediaJobResponse createPicProcessJob(MediaJobsRequest req);
+
+    MediaListQueueResponse describePicProcessQueues(MediaQueueRequest request);
+
+    boolean processImage2(CImageProcessRequest imageProcessRequest);
+
+    FileProcessJobResponse createFileProcessJob(FileProcessRequest request);
+    FileProcessJobResponse describeFileProcessJob(FileProcessRequest request);
+
+    BatchJobResponse createInventoryTriggerJob(BatchJobRequest request);
+
+    BatchJobResponse describeInventoryTriggerJob(BatchJobRequest request);
+
+    AutoTranslationBlockResponse autoTranslationBlock(AutoTranslationBlockRequest request);
+
+    DetectFaceResponse detectFace(DetectFaceRequest request);
+
+    AIGameRecResponse aiGameRec(AIRecRequest request);
+
+    Boolean cancelLiveAuditing(VideoAuditingRequest request);
+
+    AuditingStrategyResponse addAuditingStrategy(AuditingStrategyRequest request);
+    AuditingStrategyResponse updateAuditingStrategy(AuditingStrategyRequest request);
+    AuditingStrategyResponse describeAuditingStrategy(AuditingStrategyRequest request);
+    AuditingStrategyListResponse describeAuditingStrategyList(AuditingStrategyRequest request);
+
+    AuditingTextLibResponse addAuditingTextLib(AuditingTextLibRequest request);
+
+    AuditingTextLibResponse describeAuditingTextLib(AuditingTextLibRequest request);
+
+    AuditingTextLibResponse updateAuditingTextLib(AuditingTextLibRequest request);
+
+    AuditingTextLibResponse deleteAuditingTextLib(AuditingTextLibRequest request);
+
+    AuditingKeywordResponse addAuditingLibKeyWord(AuditingKeywordRequest request);
+
+    AuditingKeywordResponse describeAuditingKeyWordList(AuditingKeywordRequest request);
+
+    AuditingKeywordResponse deleteAuditingKeyWord(AuditingKeywordRequest request);
+
+    ImageInspectResponse getImageInspect(ImageInspectRequest request);
+
+    MediaJobResponseV2 describeMediaJobV2(MediaJobsRequestV2 req);
+
+    InputStream aIImageColoring(AIImageColoringRequest customRequest);
+
+    PostSpeechRecognitionResponse postSpeechRecognition(PostSpeechRecognitionRequest postSpeechRecognitionRequest);
+
+    boolean faceSearchBucket(FaceSearchBucketRequest customRequest);
+
+    CreatePersonResponse createPerson(CreatePersonRequest createPersonRequest);
+
+    AddPersonFaceResponse addPersonFace(AddPersonFaceRequest addPersonFaceRequest);
+
+    SearchPersonFaceResponse searchPersonFace(SearchPersonFaceRequest customRequest);
+
+    boolean deletePersonFace(DeletePersonFaceRequest customRequest);
+
+    DNADbFilesResponse describeMediaDnaDbFiles(DNADbFilesRequest request);
+
+    DNADbConfigsResponse describeMediaDnaDbs(DNADbConfigsRequest request);
+
+    ZipPreviewResponse zipPreview(ZipPreviewRequest request);
+
+    GoodsMattingResponse goodsMatting(GoodsMattingRequest customRequest);
+
+    CreateHLSPlayKeyResponse createHLSPlayKey(CreateHLSPlayKeyRequest customRequest);
+
+    GetHLSPlayKeyResponse getHLSPlayKey(GetHLSPlayKeyRequest customRequest);
+
+    UpdataHLSPlayKeyResponse updataHLSPlayKey(UpdataHLSPlayKeyRequest customRequest);
+
+    MediaListTemplateResponse describeMediaTemplatesV2(MediaTemplateRequest request);
+
+    InputStream getPlayList(GetPlayListRequest request);
+
+    RecognizeLogoResponse recognizeLogo(RecognizeLogoRequest customRequest);
+
+    CreateDatasetResponse createDataset(CreateDatasetRequest customRequest);
+
+    CreateDatasetBindingResponse createDatasetBinding(CreateDatasetBindingRequest customRequest);
+
+    CreateFileMetaIndexResponse createFileMetaIndex(CreateFileMetaIndexRequest customRequest);
+
+    DatasetFaceSearchResponse datasetFaceSearch(DatasetFaceSearchRequest customRequest);
+
+    DatasetSimpleQueryResponse datasetSimpleQuery(DatasetSimpleQueryRequest customRequest);
+
+    DeleteDatasetResponse deleteDataset(DeleteDatasetRequest customRequest);
+
+    DeleteDatasetBindingResponse deleteDatasetBinding(DeleteDatasetBindingRequest customRequest);
+
+    DeleteFileMetaIndexResponse deleteFileMetaIndex(DeleteFileMetaIndexRequest customRequest);
+
+    DescribeDatasetResponse describeDataset(DescribeDatasetRequest customRequest);
+
+    DescribeDatasetBindingResponse describeDatasetBinding(DescribeDatasetBindingRequest customRequest);
+
+    DescribeDatasetBindingsResponse describeDatasetBindings(DescribeDatasetBindingsRequest customRequest);
+
+    DescribeDatasetsResponse describeDatasets(DescribeDatasetsRequest customRequest);
+
+    DescribeFileMetaIndexResponse describeFileMetaIndex(DescribeFileMetaIndexRequest customRequest);
+
+    SearchImageResponse searchImage(SearchImageRequest customRequest);
+
+    UpdateDatasetResponse updateDataset(UpdateDatasetRequest customRequest);
+
+    UpdateFileMetaIndexResponse updateFileMetaIndex(UpdateFileMetaIndexRequest customRequest);
+
+    MediaTemplateResponseV2 createMediaTemplateV2(MediaTemplateRequestV2 request);
+
+    ImageOCRResponse imageOCR(ImageOCRRequest request);
 }
 
 

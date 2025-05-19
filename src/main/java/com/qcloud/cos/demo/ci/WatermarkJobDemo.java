@@ -39,7 +39,7 @@ public class WatermarkJobDemo {
         MediaJobsRequest request = new MediaJobsRequest();
         //2.添加请求参数 参数详情请见api接口文档
         request.setBucketName("demobucket-1234567890");
-        request.setTag("Transcode");
+        request.setTag("Watermark");
         request.getInput().setObject("1.mp4");
         MediaTranscodeObject transcode = request.getOperation().getTranscode();
         MediaContainerObject container = transcode.getContainer();
@@ -100,7 +100,6 @@ public class WatermarkJobDemo {
         request.getOperation().getOutput().setBucket("demobucket-1234567890");
         request.getOperation().getOutput().setRegion("ap-chongqing");
         request.getOperation().getOutput().setObject("watermark-demo.mp4");
-        request.setQueueId("p9900025e4ec44b5e8225e70a521*****");
         //3.调用接口,获取任务响应对象
         MediaJobResponse response = client.createMediaJobs(request);
         System.out.println(response);

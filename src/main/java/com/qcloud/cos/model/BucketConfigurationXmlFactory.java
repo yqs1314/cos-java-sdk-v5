@@ -28,6 +28,9 @@ import com.qcloud.cos.model.BucketLifecycleConfiguration.Transition;
 import com.qcloud.cos.model.CORSRule.AllowedMethods;
 import com.qcloud.cos.model.Tag.LifecycleTagPredicate;
 import com.qcloud.cos.model.Tag.Tag;
+import com.qcloud.cos.model.bucketcertificate.BucketDomainCertificateInfo;
+import com.qcloud.cos.model.bucketcertificate.BucketDomainCertificateParameters;
+import com.qcloud.cos.model.bucketcertificate.BucketPutDomainCertificate;
 import com.qcloud.cos.model.inventory.InventoryConfiguration;
 import com.qcloud.cos.model.inventory.InventoryCosBucketDestination;
 import com.qcloud.cos.model.inventory.InventoryDestination;
@@ -155,6 +158,28 @@ public class BucketConfigurationXmlFactory {
         }
 
         xml.end();
+
+        return xml.getBytes();
+    }
+
+    public byte[] convertToXmlByteArray(BucketEncryptionConfiguration config) throws CosClientException {
+        XmlWriter xml = new XmlWriter();
+        xml.start("ServerSideEncryptionConfiguration");
+        xml.start("Rule");
+        if (!config.getBucketEnabled().isEmpty()) {
+            xml.start("BucketKeyEnabled").value(config.getBucketEnabled()).end();
+        }
+        xml.start("ApplyServerSideEncryptionByDefault");
+        xml.start("SSEAlgorithm").value(config.getSseAlgorithm()).end();
+        if (!config.getKmsMasterKeyID().isEmpty()) {
+            xml.start("KMSMasterKeyID").value(config.getKmsMasterKeyID()).end();
+        }
+        if (!config.getKMSAlgorithm().isEmpty()) {
+            xml.start("KMSAlgorithm").value(config.getKMSAlgorithm()).end();
+        }
+        xml.end(); // ApplyServerSideEncryptionByDefault
+        xml.end(); // Rule
+        xml.end(); // ServerSideEncryptionConfiguration
 
         return xml.getBytes();
     }
@@ -668,4 +693,27 @@ public class BucketConfigurationXmlFactory {
         return xml.getBytes();
     }
 
+    public byte[] convertToXmlByteArray(BucketPutDomainCertificate domainCertificate)
+            throws CosClientException{
+        XmlWriter xml = new XmlWriter();
+        xml.start(BucketDomainCertificateParameters.Element_Domain_Certificate);
+        BucketDomainCertificateInfo certificateInfo = domainCertificate.getBucketDomainCertificateInfo();
+        xml.start(BucketDomainCertificateParameters.Element_CertificateInfo);
+        xml.start(BucketDomainCertificateParameters.Element_CertType).value(certificateInfo.getCertType()).end();
+
+        xml.start(BucketDomainCertificateParameters.Element_CustomCert);
+        xml.start(BucketDomainCertificateParameters.Element_Cert).value(certificateInfo.getCert()).end();
+        xml.start(BucketDomainCertificateParameters.Element_PrivateKey).value(certificateInfo.getPrivateKey()).end();
+        xml.end();
+        xml.end();
+
+        xml.start(BucketDomainCertificateParameters.Element_DomainList);
+        for (String domain : domainCertificate.getDomainList()) {
+            xml.start(BucketDomainCertificateParameters.Element_DomainName).value(domain).end();
+        }
+        xml.end();
+        xml.end();
+
+        return xml.getBytes();
+    }
 }

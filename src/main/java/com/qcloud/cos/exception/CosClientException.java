@@ -90,4 +90,13 @@ public class CosClientException extends RuntimeException {
     public boolean isRetryable() {
         return true;
     }
+
+    public boolean isRequestTimeout() {
+        return errorCode == ClientExceptionConstants.REQUEST_TIMEOUT;
+    }
+
+    public String toString() {
+        String causeName = (getCause() == null) ? "null" : getCause().getClass().getName();
+        return super.toString() + ". errCode:" + getErrorCode() + ",causeExp:" + causeName;
+    }
 }

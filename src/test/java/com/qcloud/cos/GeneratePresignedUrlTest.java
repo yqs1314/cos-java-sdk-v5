@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.qcloud.cos.auth.AnonymousCOSCredentials;
 import com.qcloud.cos.auth.COSCredentials;
@@ -144,9 +145,9 @@ public class GeneratePresignedUrlTest extends AbstractCOSClientTest {
             assertTrue(putUrl.toString().startsWith("https://"));
             assertTrue(getUrl.toString().startsWith("https://"));
             assertTrue(delUrl.toString().startsWith("https://"));
-            assertTrue(putUrl.toString().contains("sign="));
-            assertTrue(getUrl.toString().contains("sign="));
-            assertTrue(delUrl.toString().contains("sign="));
+            assertTrue(putUrl.toString().contains("q-signature="));
+            assertTrue(getUrl.toString().contains("q-signature="));
+            assertTrue(delUrl.toString().contains("q-signature="));
             testPutFileWithUrl(putUrl, localFile);
             headSimpleObject(key, localFile.length(), Md5Utils.md5Hex(localFile));
             testGetFileWithUrl(getUrl, downLoadFile);
@@ -182,15 +183,15 @@ public class GeneratePresignedUrlTest extends AbstractCOSClientTest {
         File downLoadFile = new File(localFile.getAbsolutePath() + ".down");
         try {
             Date expirationTime = new Date(System.currentTimeMillis() + 30 * 60 * 1000);
-            URL putUrl = anoyCOSClient.generatePresignedUrl(bucket, key, expirationTime, HttpMethodName.PUT, new HashMap<String, String>(), new HashMap<String, String>());
+            URL putUrl = anoyCOSClient.generatePresignedUrl(bucket, key, expirationTime, HttpMethodName.PUT, new HashMap<String, String>(), new HashMap<String, String>(), false, false);
             URL getUrl = anoyCOSClient.generatePresignedUrl(bucket, key, expirationTime, HttpMethodName.GET, new HashMap<String, String>(), new HashMap<String, String>());
             URL delUrl = anoyCOSClient.generatePresignedUrl(bucket, key, expirationTime, HttpMethodName.DELETE, new HashMap<String, String>(), new HashMap<String, String>());
             assertTrue(putUrl.toString().startsWith("https://"));
             assertTrue(getUrl.toString().startsWith("https://"));
             assertTrue(delUrl.toString().startsWith("https://"));
-            assertFalse(putUrl.toString().contains("sign="));
-            assertFalse(getUrl.toString().contains("sign="));
-            assertFalse(delUrl.toString().contains("sign="));
+            assertFalse(putUrl.toString().contains("q-signature="));
+            assertFalse(getUrl.toString().contains("q-signature="));
+            assertFalse(delUrl.toString().contains("q-signature="));
             testPutFileWithUrl(putUrl, localFile);
             headSimpleObject(key, localFile.length(), Md5Utils.md5Hex(localFile));
             testGetFileWithUrl(getUrl, downLoadFile);
@@ -225,9 +226,9 @@ public class GeneratePresignedUrlTest extends AbstractCOSClientTest {
             assertTrue(putUrl.toString().startsWith("https://"));
             assertTrue(getUrl.toString().startsWith("https://"));
             assertTrue(delUrl.toString().startsWith("https://"));
-            assertTrue(putUrl.toString().contains("sign="));
-            assertTrue(getUrl.toString().contains("sign="));
-            assertTrue(delUrl.toString().contains("sign="));
+            assertTrue(putUrl.toString().contains("q-signature="));
+            assertTrue(getUrl.toString().contains("q-signature="));
+            assertTrue(delUrl.toString().contains("q-signature="));
             assertTrue(putUrl.toString().contains("&" + Headers.SECURITY_TOKEN));
             assertTrue(getUrl.toString().contains("&" + Headers.SECURITY_TOKEN));
             assertTrue(delUrl.toString().contains("&" + Headers.SECURITY_TOKEN));
@@ -244,5 +245,23 @@ public class GeneratePresignedUrlTest extends AbstractCOSClientTest {
             assertTrue(downLoadFile.delete()); 
             temporyCOSClient.shutdown();
         }
+    }
+
+    @Test
+    public void testGenerateUrlWithParamsAndHeaders() {
+        Date expirationTime = new Date(System.currentTimeMillis() + 30 * 60 * 1000);
+        Map<String, String> params = new HashMap<>();
+        params.put("response-content-disposition", "attachment");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("x-cos-acl", "public-read");
+
+        URL url = cosclient.generatePresignedUrl(bucket, "test", expirationTime, HttpMethodName.PUT, headers, params, false, true);
+
+        URL get_url = cosclient.generatePresignedUrl(bucket, "test", expirationTime);
+
+        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, "test");
+        generatePresignedUrlRequest.addRequestParameter("response-content-disposition", "attachment");
+        URL url2 = cosclient.generatePresignedUrl(generatePresignedUrlRequest, true);
     }
 }

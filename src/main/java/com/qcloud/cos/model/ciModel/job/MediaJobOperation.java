@@ -7,6 +7,7 @@ import com.qcloud.cos.model.ciModel.template.MediaSmartCoverObject;
 import com.qcloud.cos.model.ciModel.template.MediaSnapshotObject;
 import com.qcloud.cos.model.ciModel.template.MediaVideoMontageObject;
 import com.qcloud.cos.model.ciModel.template.MediaWatermark;
+import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,26 +17,159 @@ import java.util.List;
  */
 
 public class MediaJobOperation {
+    @XStreamAlias("TemplateId")
     private String templateId;
+
+    @XStreamAlias("Version")
+    private String version;
+
+    @XStreamAlias("JobLevel")
+    private String jobLevel;
+
+    @XStreamAlias("UserData")
+    private String UserData;
+
+    @XStreamAlias("TemplateName")
+    private String templateName;
+
+    @XStreamAlias("DecryptKey")
+    private String decryptKey;
+
+    @XStreamAlias("DecryptIv")
+    private String decryptIv;
+
+    @XStreamAlias("DecryptMode")
+    private String decryptMode;
+
+    @XStreamAlias("EncryptKey")
+    private String encryptKey;
+
+    @XStreamAlias("EncryptIv")
+    private String encryptIv;
+
+    @XStreamAlias("EncryptMode")
+    private String encryptMode;
+    @XStreamAlias("SnapshotPrefix")
+    private String snapshotPrefix;
+
+    @XStreamAlias("FreeTranscode")
+    private String freeTranscode;
+
+    @XStreamAlias("Output")
     private MediaOutputObject output;
+
+    @XStreamAlias("MediaAnimation")
     private MediaAnimationObject mediaAnimation;
+
+    @XStreamAlias("MediaInfo")
     private MediaInfoObjcet mediaInfo;
+
+    @XStreamAlias("MediaRemoveWaterMark")
     private MediaRemoveWaterMark removeWatermark;
+
+    @XStreamAlias("MediaWatermark")
     private MediaWatermark watermark;
+
+    @XStreamAlias("MediaTranscode")
     private MediaTranscodeObject transcode;
+
+    @XStreamAlias("WatermarkTemplateId")
     private List<String> watermarkTemplateId;
+
+    @XStreamAlias("WatermarkList")
     private List<MediaWatermark> watermarkList;
+
+    @XStreamAlias("MediaConcatTemplate")
     private MediaConcatTemplateObject mediaConcatTemplate;
+
+    @XStreamAlias("MediaSnapshot")
     private MediaSnapshotObject snapshot = new MediaSnapshotObject();
+
+    @XStreamAlias("MediaSegment")
     private MediaSegmentObject segment = new MediaSegmentObject();
+
+    @XStreamAlias("MediaSmartCover")
     private MediaSmartCoverObject smartCover = new MediaSmartCoverObject();
+
+    @XStreamAlias("MediaVideoMontage")
     private MediaVideoMontageObject videoMontage = new MediaVideoMontageObject();
+
+    @XStreamAlias("DigitalWatermark")
     private MediaDigitalWatermark digitalWatermark = new MediaDigitalWatermark();
+
+    @XStreamAlias("ExtractDigitalWatermark")
     private ExtractDigitalWatermark extractDigitalWatermark = new ExtractDigitalWatermark();
+
+    @XStreamAlias("MediaPicProcessTemplate")
     private MediaPicProcessTemplateObject picProcess = new MediaPicProcessTemplateObject();
 
-    public MediaJobOperation() {
-        this.output = new MediaOutputObject();
+    @XStreamAlias("MediaResult")
+    private MediaResult mediaResult = new MediaResult();
+
+    @XStreamAlias("PicProcessResult")
+    private PicProcessResult picProcessResult = new PicProcessResult();
+
+    @XStreamAlias("VideoTargetRec")
+    private VideoTargetRec videoTargetRec = new VideoTargetRec();
+
+    @XStreamAlias("VoiceSeparate")
+    private VoiceSeparate voiceSeparate = new VoiceSeparate();
+
+    @XStreamAlias("MediaTimeInterval")
+    private MediaTimeIntervalObject timeInterval = new MediaTimeIntervalObject();
+
+    @XStreamAlias("MediaTtsConfig")
+    private MediaTtsConfig ttsConfig = new MediaTtsConfig();
+
+    @XStreamAlias("VideoEnhance")
+    private VideoEnhance videoEnhance = new VideoEnhance();
+
+    @XStreamAlias("TtsTpl")
+    private TtsTpl ttsTpl = new TtsTpl();
+
+    @XStreamAlias("Subtitles")
+    private Subtitles subtitles = new Subtitles();
+
+    @XStreamAlias("VideoTag")
+    private VideoTag videoTag = new VideoTag();
+
+    @XStreamAlias("VideoTagResult")
+    private VideoTagResult videoTagResult = new VideoTagResult();
+
+    @XStreamAlias("QualityEstimateConfig")
+    private QualityEstimateConfig qualityEstimateConfig = new QualityEstimateConfig();
+
+    @XStreamAlias("QualityEstimate")
+    private QualityEstimate qualityEstimate = new QualityEstimate();
+
+    @XStreamAlias("VocalScore")
+    private VocalScore vocalScore = new VocalScore();
+
+    @XStreamAlias("VocalScoreResult")
+    private VocalScoreResult vocalScoreResult = new VocalScoreResult();
+
+    public VocalScoreResult getVocalScoreResult() {
+        return vocalScoreResult;
+    }
+
+    public void setVocalScoreResult(VocalScoreResult vocalScoreResult) {
+        this.vocalScoreResult = vocalScoreResult;
+    }
+
+    public VocalScore getVocalScore() {
+        return vocalScore;
+    }
+
+    public void setVocalScore(VocalScore vocalScore) {
+        this.vocalScore = vocalScore;
+    }
+
+    public MediaTimeIntervalObject getTimeInterval() {
+        return timeInterval;
+    }
+
+    public void setTimeInterval(MediaTimeIntervalObject timeInterval) {
+        this.timeInterval = timeInterval;
     }
 
     public String getTemplateId() {
@@ -151,14 +285,6 @@ public class MediaJobOperation {
         this.extractDigitalWatermark = extractDigitalWatermark;
     }
 
-    public MediaPicProcessTemplateObject getPicProcess() {
-        return picProcess;
-    }
-
-    public void setPicProcess(MediaPicProcessTemplateObject picProcess) {
-        this.picProcess = picProcess;
-    }
-
     public MediaSnapshotObject getSnapshot() {
         return snapshot;
     }
@@ -202,10 +328,232 @@ public class MediaJobOperation {
         this.videoMontage = videoMontage;
     }
 
+    public String getJobLevel() {
+        return jobLevel;
+    }
+
+    public void setJobLevel(String jobLevel) {
+        this.jobLevel = jobLevel;
+    }
+
+    public MediaPicProcessTemplateObject getPicProcess() {
+        if (picProcess == null) {
+            picProcess = new MediaPicProcessTemplateObject();
+        }
+        return picProcess;
+    }
+
+    public void setPicProcess(MediaPicProcessTemplateObject picProcess) {
+        this.picProcess = picProcess;
+    }
+
+    public String getUserData() {
+        return UserData;
+    }
+
+    public void setUserData(String userData) {
+        UserData = userData;
+    }
+
+    public String getTemplateName() {
+        return templateName;
+    }
+
+    public void setTemplateName(String templateName) {
+        this.templateName = templateName;
+    }
+
+    public MediaResult getMediaResult() {
+        return mediaResult;
+    }
+
+    public void setMediaResult(MediaResult mediaResult) {
+        this.mediaResult = mediaResult;
+    }
+
+    public PicProcessResult getPicProcessResult() {
+        return picProcessResult;
+    }
+
+    public void setPicProcessResult(PicProcessResult picProcessResult) {
+        this.picProcessResult = picProcessResult;
+    }
+
+    public String getDecryptKey() {
+        return decryptKey;
+    }
+
+    public void setDecryptKey(String decryptKey) {
+        this.decryptKey = decryptKey;
+    }
+
+    public VideoTargetRec getVideoTargetRec() {
+        if (videoTargetRec == null) {
+            videoTargetRec = new VideoTargetRec();
+        }
+        return videoTargetRec;
+    }
+
+    public void setVideoTargetRec(VideoTargetRec videoTargetRec) {
+        this.videoTargetRec = videoTargetRec;
+    }
+
+    public VoiceSeparate getVoiceSeparate() {
+        return voiceSeparate;
+    }
+
+    public void setVoiceSeparate(VoiceSeparate voiceSeparate) {
+        this.voiceSeparate = voiceSeparate;
+    }
+
+    public MediaTtsConfig getTtsConfig() {
+        return ttsConfig;
+    }
+
+    public void setTtsConfig(MediaTtsConfig ttsConfig) {
+        this.ttsConfig = ttsConfig;
+    }
+
+    public TtsTpl getTtsTpl() {
+        return ttsTpl;
+    }
+
+    public void setTtsTpl(TtsTpl ttsTpl) {
+        this.ttsTpl = ttsTpl;
+    }
+
+    public VideoEnhance getVideoEnhance() {
+        return videoEnhance;
+    }
+
+    public void setVideoEnhance(VideoEnhance videoEnhance) {
+        this.videoEnhance = videoEnhance;
+    }
+
+    public Subtitles getSubtitles() {
+        return subtitles;
+    }
+
+    public void setSubtitles(Subtitles subtitles) {
+        this.subtitles = subtitles;
+    }
+
+    public VideoTag getVideoTag() {
+        return videoTag;
+    }
+
+    public void setVideoTag(VideoTag videoTag) {
+        this.videoTag = videoTag;
+    }
+
+    public String getDecryptIv() {
+        return decryptIv;
+    }
+
+    public void setDecryptIv(String decryptIv) {
+        this.decryptIv = decryptIv;
+    }
+
+    public String getDecryptMode() {
+        return decryptMode;
+    }
+
+    public void setDecryptMode(String decryptMode) {
+        this.decryptMode = decryptMode;
+    }
+
+    public String getEncryptKey() {
+        return encryptKey;
+    }
+
+    public void setEncryptKey(String encryptKey) {
+        this.encryptKey = encryptKey;
+    }
+
+    public String getEncryptIv() {
+        return encryptIv;
+    }
+
+    public void setEncryptIv(String encryptIv) {
+        this.encryptIv = encryptIv;
+    }
+
+    public String getEncryptMode() {
+        return encryptMode;
+    }
+
+    public void setEncryptMode(String encryptMode) {
+        this.encryptMode = encryptMode;
+    }
+
+    public VideoTagResult getVideoTagResult() {
+        if (videoTagResult == null) {
+            videoTagResult = new VideoTagResult();
+        }
+        return videoTagResult;
+    }
+
+    public void setVideoTagResult(VideoTagResult videoTagResult) {
+        this.videoTagResult = videoTagResult;
+    }
+
+    public QualityEstimateConfig getQualityEstimateConfig() {
+        return qualityEstimateConfig;
+    }
+
+    public void setQualityEstimateConfig(QualityEstimateConfig qualityEstimateConfig) {
+        this.qualityEstimateConfig = qualityEstimateConfig;
+    }
+
+    public QualityEstimate getQualityEstimate() {
+        if (qualityEstimate == null) {
+            qualityEstimate = new QualityEstimate();
+        }
+        return qualityEstimate;
+    }
+
+    public void setQualityEstimate(QualityEstimate qualityEstimate) {
+        this.qualityEstimate = qualityEstimate;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getFreeTranscode() {
+        return freeTranscode;
+    }
+
+    public void setFreeTranscode(String freeTranscode) {
+        this.freeTranscode = freeTranscode;
+    }
+
+    public String getSnapshotPrefix() {
+        return snapshotPrefix;
+    }
+
+    public void setSnapshotPrefix(String snapshotPrefix) {
+        this.snapshotPrefix = snapshotPrefix;
+    }
+
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("MediaJobOperation{");
+        final StringBuilder sb = new StringBuilder("MediaJobOperation{");
         sb.append("templateId='").append(templateId).append('\'');
+        sb.append(", version='").append(version).append('\'');
+        sb.append(", jobLevel='").append(jobLevel).append('\'');
+        sb.append(", UserData='").append(UserData).append('\'');
+        sb.append(", templateName='").append(templateName).append('\'');
+        sb.append(", decryptKey='").append(decryptKey).append('\'');
+        sb.append(", decryptIv='").append(decryptIv).append('\'');
+        sb.append(", decryptMode='").append(decryptMode).append('\'');
+        sb.append(", encryptKey='").append(encryptKey).append('\'');
+        sb.append(", encryptIv='").append(encryptIv).append('\'');
+        sb.append(", encryptMode='").append(encryptMode).append('\'');
         sb.append(", output=").append(output);
         sb.append(", mediaAnimation=").append(mediaAnimation);
         sb.append(", mediaInfo=").append(mediaInfo);
@@ -222,6 +570,21 @@ public class MediaJobOperation {
         sb.append(", digitalWatermark=").append(digitalWatermark);
         sb.append(", extractDigitalWatermark=").append(extractDigitalWatermark);
         sb.append(", picProcess=").append(picProcess);
+        sb.append(", mediaResult=").append(mediaResult);
+        sb.append(", picProcessResult=").append(picProcessResult);
+        sb.append(", videoTargetRec=").append(videoTargetRec);
+        sb.append(", voiceSeparate=").append(voiceSeparate);
+        sb.append(", timeInterval=").append(timeInterval);
+        sb.append(", ttsConfig=").append(ttsConfig);
+        sb.append(", videoEnhance=").append(videoEnhance);
+        sb.append(", ttsTpl=").append(ttsTpl);
+        sb.append(", subtitles=").append(subtitles);
+        sb.append(", videoTag=").append(videoTag);
+        sb.append(", videoTagResult=").append(videoTagResult);
+        sb.append(", qualityEstimateConfig=").append(qualityEstimateConfig);
+        sb.append(", qualityEstimate=").append(qualityEstimate);
+        sb.append(", vocalScore=").append(vocalScore);
+        sb.append(", vocalScoreResult=").append(vocalScoreResult);
         sb.append('}');
         return sb.toString();
     }

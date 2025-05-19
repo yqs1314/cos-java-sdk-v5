@@ -18,11 +18,18 @@
 package com.qcloud.cos.retry;
 
 import java.io.IOException;
+import java.util.Objects;
 
+import com.qcloud.cos.exception.CosServiceException;
 import com.qcloud.cos.http.CosHttpRequest;
 import com.qcloud.cos.internal.CosServiceRequest;
 
+import com.qcloud.cos.model.PutObjectRequest;
+import com.qcloud.cos.model.UploadPartRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.CircularRedirectException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class PredefinedRetryPolicies {
@@ -50,18 +57,40 @@ public class PredefinedRetryPolicies {
     }
 
     public static class SdkDefaultRetryPolicy extends RetryPolicy {
-
+        private static final Logger log = LoggerFactory.getLogger(SdkDefaultRetryPolicy.class);
         @Override
         public <X extends CosServiceRequest> boolean shouldRetry(CosHttpRequest<X> request,
                 HttpResponse response,
                 Exception exception,
                 int retryIndex) {
             if (RetryUtils.isRetryableServiceException(exception)) {
+                if (request.getParameters().containsKey("preflight")) {
+                    return false;
+                }
+
+                if (!isRetryAfterPreflight() && request.getOriginalRequest() != null && request.getOriginalRequest() instanceof PutObjectRequest && ((PutObjectRequest) request.getOriginalRequest()).hasDonePreflight()) {
+                    if (((CosServiceException) exception).getStatusCode() == 503 && Objects.equals(((CosServiceException) exception).getErrorCode(), "SlowDown")) {
+                        log.info("will not retry for 503 while putting object, because preflight request has been done");
+                        return false;
+                    }
+                }
+
+                if (!isRetryAfterPreflight() && request.getOriginalRequest() != null && request.getOriginalRequest() instanceof UploadPartRequest && ((UploadPartRequest) request.getOriginalRequest()).hasDonePreflight()) {
+                    if (((CosServiceException) exception).getStatusCode() == 503 && Objects.equals(((CosServiceException) exception).getErrorCode(), "SlowDown")) {
+                        log.info("will not retry for 503 while upload part, because preflight request has been done");
+                        return false;
+                    }
+                }
+
                 return true;
             }
 
             // Always retry on client exceptions caused by IOException
             if (exception.getCause() instanceof IOException) {
+                if (exception.getCause().getCause() != null && exception.getCause().getCause() instanceof CircularRedirectException) {
+                    log.error("CircularRedirectException will not retry");
+                    return false;
+                }
                 return true;
             }
             return false;

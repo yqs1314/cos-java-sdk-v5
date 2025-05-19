@@ -5,6 +5,90 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.6.244.4]
+- 3xx exception retry
+
+## [5.6.244.3]
+- preflight for upload part 
+- x-cos-hash-crc32c
+- delete object version
+- throw 412 & 304 directly
+
+## [5.6.240.2]
+- update IdleConnectionMonitor
+
+## [5.6.240]
+- update tencentcloud-sdk-java-kms version
+- populate preflight request metadata
+
+## [5.6.238]
+- update request timeout
+- do not follow 302 by default
+
+## [5.6.234]
+- prefliht object before doing upload
+- add bucket encryption configuration API
+- add list bucket intelligent tiering Configuration API
+
+## [5.6.228]
+- ignoring certificate verification is supported
+
+## [5.6.220]
+- setting only the range start or only the range end is supported
+
+## [5.6.218]
+- add resumable upload
+
+## [5.6.208]
+- change default endpoint when retrying for the last time
+
+## [5.6.205]
+- encode source object name when renaming  OFS object
+
+## [5.6.195]
+- retry for some exceptions when copying object  
+
+## [5.6.168]
+- fetch resumable download
+
+## [5.6.151]
+- add CI Live Auditing API
+
+## [5.6.141]
+- add CI DetectFace API
+- update CI API
+
+## [5.6.140]
+- create MAZ bucket
+
+## [5.6.133]
+- update CI Media Process API
+
+## [5.6.119]
+- add CI Batch Job API
+- add File Process API
+
+## [5.6.109]
+- add Media Process ConcatTemplate API
+
+## [5.6.107]
+- update Auditing API
+
+## [5.6.105]
+- update PicProcess API 
+
+## [5.6.103]
+- update auditing bean
+- add video transcoding parameters
+
+## [5.6.101]
+- add CI ReportBadCase API
+- update CI DocumentPreview API
+- update QRCode API
+
+## [5.6.99]
+- update CI image processing API
+
 ## [5.6.97]
 - update Auditing API
 

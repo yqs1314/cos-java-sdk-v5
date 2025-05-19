@@ -15,7 +15,11 @@ import com.qcloud.cos.model.UinGrantee;
 import com.qcloud.cos.region.Region;
 
 public class SetGetObjectAclDemo {
-    public static void setGetObjectAclTest() {
+    public static void main(String[] args) throws InterruptedException {
+        setGetObjectAclTest();
+    }
+
+    private static void setGetObjectAclTest() {
         // 1 初始化用户身份信息(secretId, secretKey)
 	COSCredentials cred = new BasicCOSCredentials("AKIDXXXXXXXX", "1A2Z3YYYYYYYYYY");
         // 2 设置bucket的区域, COS地域的简称请参照 https://www.qcloud.com/document/product/436/6224
@@ -23,22 +27,22 @@ public class SetGetObjectAclDemo {
         // 3 生成cos客户端
         COSClient cosclient = new COSClient(cred, clientConfig);
         // bucket名需包含appid
-        String bucketName = "mybucket-1251668577";
+        String bucketName = "mybucket-12500000000";
         String key = "aaa/bbb.txt";
         cosclient.putObject(bucketName, key, "data");
 
         // 设置对象的acl
         AccessControlList acl = new AccessControlList();
         Owner owner = new Owner();
-        owner.setId("qcs::cam::uin/2779643970:uin/2779643970");
+        owner.setId("qcs::cam::uin/100000000001:uin/100000000001");
         acl.setOwner(owner);
-        // 设置子账号734505014具有WriteAcp权限
-        String id = "qcs::cam::uin/2779643970:uin/734505014";
+        // 设置子账号100000000002具有WriteAcp权限
+        String id = "qcs::cam::uin/100000000001:uin/100000000002";
         UinGrantee uinGrantee = new UinGrantee(id);
         uinGrantee.setIdentifier(id);
-        // 设置子账号909619400具有Read权限
+        // 设置子账号100000000003具有Read权限
         acl.grantPermission(uinGrantee, Permission.WriteAcp);
-        String id1 = "qcs::cam::uin/2779643970:uin/909619400";
+        String id1 = "qcs::cam::uin/100000000001:uin/100000000003";
         UinGrantee uinGrantee1 = new UinGrantee(id1);
         uinGrantee.setIdentifier(id1);
         acl.grantPermission(uinGrantee1, Permission.Read);
@@ -63,10 +67,6 @@ public class SetGetObjectAclDemo {
         accessControlList = cosclient.getObjectAcl(bucketName, key);
         System.out.println("default object acl:" + accessControlList.getCannedAccessControl());
 
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        setGetObjectAclTest();
     }
 }
 

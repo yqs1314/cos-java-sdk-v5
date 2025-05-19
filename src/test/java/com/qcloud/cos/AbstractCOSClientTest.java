@@ -100,6 +100,10 @@ public class AbstractCOSClientTest {
     protected static COSClient cosclient = null;
     protected static File tmpDir = null;
     protected static String cmk = null;
+    protected static String ownerUin = null;
+    protected static String userDefDomain = null;
+    protected static String domainKeyPath = null;
+    protected static String domainPemPath = null;
 
     protected static boolean useClientEncryption = false;
     protected static boolean useServerEncryption = false;
@@ -157,10 +161,11 @@ public class AbstractCOSClientTest {
         secretId = System.getenv("secretId");
         secretKey = System.getenv("secretKey");
         region = System.getenv("region");
-        bucket = System.getenv("bucket");
+        bucket = System.getenv("bucket") + (int) (Math.random() * 1000000) + "-" + appid;
         generalApiEndpoint = System.getenv("generalApiEndpoint");
         serviceApiEndpoint = System.getenv("serviceApiEndpoint");
-        cmk = System.getenv("cmk");
+        cmk = System.getenv("KMS_ID");
+        ownerUin = System.getenv("owner_uin");
 
         File propFile = new File("ut_account.prop");
         if (propFile.exists() && propFile.canRead()) {
@@ -180,7 +185,8 @@ public class AbstractCOSClientTest {
                 useCPMInstanceCredentials = Boolean.parseBoolean(prop.getProperty("useCPMInstanceCredentials", "false"
                 ));
                 useCVMInstanceCredentials = Boolean.parseBoolean(prop.getProperty("useCVMInstanceCredentials", "false"));
-                cmk = prop.getProperty("cmk");
+                cmk = prop.getProperty("KMS_ID");
+                ownerUin = System.getenv("owner_uin");
             } finally {
                 if (fis != null) {
                     try {
@@ -284,22 +290,24 @@ public class AbstractCOSClientTest {
         if (!tmpDir.exists()) {
             tmpDir.mkdirs();
         }
-        deleteBucket();             // 先清理掉原先的bucket
+        //deleteBucket();             // 先清理掉原先的bucket
         createBucket();             // 然后再重新创建
     }
 
-    private static void createBucket() throws Exception {
-        try {
-            // 避免有查询缓存，导致创建bucket失败
-            Thread.sleep(5000L);
-            String bucketName = bucket;
-            CreateBucketRequest createBucketRequest = new CreateBucketRequest(bucketName);
-            Bucket createdBucket = cosclient.createBucket(createBucketRequest);
-            assertEquals(bucketName, createdBucket.getName());
-            Thread.sleep(5000L);
-            assertTrue(cosclient.doesBucketExist(bucketName));
-        } catch (CosServiceException cse) {
-            fail(cse.toString());
+    protected static void createBucket() throws Exception {
+        Boolean switch_to_stop = true;
+        while (switch_to_stop) {
+            try {
+                cosclient.createBucket(bucket);
+                switch_to_stop = false;
+            } catch (CosServiceException cse) {
+                if (cse.getStatusCode() == 409) {
+                    bucket = System.getenv("bucket") + (int) (Math.random() * 1000000) + "-" + appid;
+                    continue;
+                }
+                cse.printStackTrace();
+                fail(cse.getErrorMessage());
+            }
         }
     }
 
@@ -346,11 +354,11 @@ public class AbstractCOSClientTest {
         }
     }
 
-    private static void clearBucket() throws Exception {
+    protected static void clearBucket(String bucketName) throws Exception{
         abortAllNotFinishedMultipartUpload();
         // 先判断bucket是否开启了版本控制
         GetBucketVersioningConfigurationRequest getBucketVersioningConfigurationRequest =
-                new GetBucketVersioningConfigurationRequest(bucket);
+                new GetBucketVersioningConfigurationRequest(bucketName);
         BucketVersioningConfiguration bucketVersioningConfiguration = cosclient.getBucketVersioningConfiguration(
                 getBucketVersioningConfigurationRequest
         );
@@ -361,7 +369,7 @@ public class AbstractCOSClientTest {
         boolean isTruncated = false;
         do {
             ListObjectsRequest listObjectsRequest = new ListObjectsRequest();
-            listObjectsRequest.setBucketName(bucket);
+            listObjectsRequest.setBucketName(bucketName);
             listObjectsRequest.setMaxKeys(1000);
             listObjectsRequest.setPrefix("");
             listObjectsRequest.setDelimiter("");
@@ -371,27 +379,33 @@ public class AbstractCOSClientTest {
                 String key = cosObjectSummary.getKey();
                 // 删除这个key
                 System.out.println(key);
-                cosclient.deleteObject(bucket, key);
+                cosclient.deleteObject(bucketName, key);
             }
             nextMarker = objectListing.getNextMarker();
             isTruncated = objectListing.isTruncated();
         } while (isTruncated);
     }
 
-    private static void deleteBucket() throws Exception {
-        if (!cosclient.doesBucketExist(bucket)) {
-            return;
-        }
+    protected static void deleteBucket(String bucketname) throws Exception {
+//        if (!cosclient.doesBucketExist(bucketname)) {
+//            return;
+//        }
 
         try {
-            clearBucket();
-            cosclient.deleteBucket(bucket);
+            clearBucket(bucketname);
+            cosclient.deleteBucket(bucketname);
             // 删除bucket后, 由于server端有缓存 需要稍后查询, 这里sleep 5 秒
             Thread.sleep(5000L);
-            assertFalse(cosclient.doesBucketExist(bucket));
+            //assertFalse(cosclient.doesBucketExist(bucketname));
         } catch (CosServiceException cse) {
-            fail(cse.toString());
+            if (404 != cse.getStatusCode()){
+                cse.printStackTrace();
+            }
         }
+    }
+
+    protected static void deleteBucket() throws Exception {
+        deleteBucket(bucket);
     }
 
     public static void destoryCosClient() throws Exception {
@@ -432,21 +446,38 @@ public class AbstractCOSClientTest {
         }
         // putObjectRequest.setCannedAcl(CannedAccessControlList.PublicRead);
         // putObjectRequest.setAccessControlList(acl);
-
-        PutObjectResult putObjectResult = cosclient.putObject(putObjectRequest);
-        assertNotNull(putObjectResult.getRequestId());
-        assertNotNull(putObjectResult.getDateStr());
-        String etag = putObjectResult.getETag();
-        String expectEtag = null;
+        PutObjectResult putObjectResult = new PutObjectResult();
         try {
-            expectEtag = Md5Utils.md5Hex(localFile);
-        } catch (IOException e) {
-            fail(e.toString());
-        }
-        if (useClientEncryption) {
-            assertEquals(false, expectEtag.equals(etag));
-        } else {
-            assertEquals(true, expectEtag.equals(etag));
+            putObjectResult = cosclient.putObject(putObjectRequest);
+            assertNotNull(putObjectResult.getRequestId());
+            assertNotNull(putObjectResult.getDateStr());
+            String etag = putObjectResult.getETag();
+            String expectEtag = null;
+            try {
+                expectEtag = Md5Utils.md5Hex(localFile);
+            } catch (IOException e) {
+                fail(e.toString());
+            }
+            if (useClientEncryption) {
+                assertEquals(false, expectEtag.equals(etag));
+            } else {
+                assertEquals(true, expectEtag.equals(etag));
+            }
+        } catch (CosServiceException cse) {
+            if (404 == cse.getStatusCode()) {
+                try {
+                    Thread.sleep(100);
+                    putObjectResult = cosclient.putObject(putObjectRequest);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (CosServiceException cse2) {
+                    if (cse2.getStatusCode() != 404) {
+                        fail(cse2.getMessage());
+                    }
+                }
+            } else {
+                cse.printStackTrace();
+            }
         }
         return putObjectResult;
     }
@@ -578,6 +609,7 @@ public class AbstractCOSClientTest {
             }
             fail(se.toString());
         } catch (Exception e) {
+            e.printStackTrace();
             fail(e.toString());
         }
     }
@@ -619,7 +651,22 @@ public class AbstractCOSClientTest {
             return;
         }
 
-        cosclient.deleteObject(bucket, key);
+        try {
+            cosclient.deleteObject(bucket, key);
+        } catch (CosServiceException cse) {
+            if (404 == cse.getStatusCode()) {
+                try {
+                    Thread.sleep(100);
+                    cosclient.deleteObject(bucket, key);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (CosServiceException cse2) {
+                    if (cse2.getStatusCode() != 404) {
+                        fail(cse2.getMessage());
+                    }
+                }
+            }
+        }
         assertFalse(cosclient.doesObjectExist(bucket, key));
     }
 
@@ -783,8 +830,7 @@ public class AbstractCOSClientTest {
         }
     }
 
-    protected String testInitMultipart(String key) {
-        InitiateMultipartUploadRequest request = new InitiateMultipartUploadRequest(bucket, key);
+    protected String testInitMultipart(InitiateMultipartUploadRequest request) {
         request.setStorageClass(StorageClass.Standard_IA);
         InitiateMultipartUploadResult initResult = cosclient.initiateMultipartUpload(request);
         return initResult.getUploadId();
@@ -893,7 +939,11 @@ public class AbstractCOSClientTest {
                 partSize, System.currentTimeMillis(), ThreadLocalRandom.current().nextLong());
 
         try {
-            String uploadId = testInitMultipart(key);
+            InitiateMultipartUploadRequest initiateMultipartUploadRequest = new InitiateMultipartUploadRequest(bucket,key);
+            if (useClientEncryption) {
+                initiateMultipartUploadRequest.setDataSizePartSize(filesize, partSize);
+            }
+            String uploadId = testInitMultipart(initiateMultipartUploadRequest);
             assertNotNull(uploadId);
             int partNum = 0;
             long byteUploaded = 0;

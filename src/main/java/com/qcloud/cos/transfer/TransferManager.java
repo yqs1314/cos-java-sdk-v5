@@ -40,6 +40,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.Executors;
 
 import com.qcloud.cos.COS;
 import com.qcloud.cos.COSClient;
@@ -676,7 +677,9 @@ public class TransferManager {
         DownloadImpl download = new DownloadImpl(description, transferProgress, listenerChain,
                 null, stateListener, getObjectRequest, destFile);
 
-        ResumableDownloadSubmitter submitter = new ResumableDownloadSubmitter(cos, threadPool, getObjectRequest,
+        ExecutorService partDownloadThreadPool = Executors.newFixedThreadPool(getObjectRequest.getDownloadPartsThreads());
+
+        ResumableDownloadSubmitter submitter = new ResumableDownloadSubmitter(cos, partDownloadThreadPool, getObjectRequest,
                 download, destFile, destRandomAccessFile, destFileChannel, downloadRecord, partSize, multiThreadThreshold, transferProgress, listenerChain);
 
         ResumableDownloadMonitor monitor = ResumableDownloadMonitor.create(listenerChain, submitter, download, threadPool,
@@ -718,7 +721,7 @@ public class TransferManager {
         long lastByte;
 
         long[] range = getObjectRequest.getRange();
-        if (range != null && range.length == 2) {
+        if (range != null && range.length == 2 && range[0] != -1 && range[1] != -1) {
             startingByte = range[0];
             lastByte = range[1];
         } else {
@@ -731,6 +734,13 @@ public class TransferManager {
             final ObjectMetadata objectMetadata = cos.getObjectMetadata(getObjectMetadataRequest);
 
             lastByte = objectMetadata.getContentLength() - 1;
+            if (range != null && range.length == 2) {
+                if (range[0] == -1) {
+                    startingByte = lastByte - range[1] + 1;
+                } else {
+                    startingByte = range[0];
+                }
+            }
         }
         final long origStartingByte = startingByte;
         // We still pass the unfiltered listener chain into DownloadImpl

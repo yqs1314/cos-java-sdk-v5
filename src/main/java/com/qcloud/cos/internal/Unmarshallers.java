@@ -26,32 +26,15 @@ import java.util.List;
 
 import com.qcloud.cos.internal.XmlResponsesSaxParser.CompleteMultipartUploadHandler;
 import com.qcloud.cos.internal.XmlResponsesSaxParser.CopyObjectResultHandler;
-import com.qcloud.cos.model.AccessControlList;
-import com.qcloud.cos.model.Bucket;
-import com.qcloud.cos.model.BucketCrossOriginConfiguration;
-import com.qcloud.cos.model.BucketDomainConfiguration;
-import com.qcloud.cos.model.BucketIntelligentTierConfiguration;
-import com.qcloud.cos.model.BucketLifecycleConfiguration;
-import com.qcloud.cos.model.BucketLoggingConfiguration;
-import com.qcloud.cos.model.BucketRefererConfiguration;
-import com.qcloud.cos.model.BucketReplicationConfiguration;
-import com.qcloud.cos.model.BucketTaggingConfiguration;
-import com.qcloud.cos.model.BucketVersioningConfiguration;
-import com.qcloud.cos.model.BucketWebsiteConfiguration;
-import com.qcloud.cos.model.DeleteBucketInventoryConfigurationResult;
-import com.qcloud.cos.model.DeleteObjectTaggingResult;
-import com.qcloud.cos.model.GetBucketInventoryConfigurationResult;
-import com.qcloud.cos.model.GetObjectTaggingResult;
-import com.qcloud.cos.model.InitiateMultipartUploadResult;
-import com.qcloud.cos.model.ListBucketInventoryConfigurationsResult;
-import com.qcloud.cos.model.MultipartUploadListing;
-import com.qcloud.cos.model.ObjectListing;
-import com.qcloud.cos.model.ObjectMetadata;
-import com.qcloud.cos.model.PartListing;
-import com.qcloud.cos.model.SetBucketInventoryConfigurationResult;
-import com.qcloud.cos.model.SetObjectTaggingResult;
-import com.qcloud.cos.model.VersionListing;
+import com.qcloud.cos.internal.cihandler.*;
+import com.qcloud.cos.model.*;
+import com.qcloud.cos.model.IntelligentTiering.BucketIntelligentTieringConfiguration;
+import com.qcloud.cos.model.bucketcertificate.BucketGetDomainCertificate;
 import com.qcloud.cos.model.ciModel.auditing.AudioAuditingResponse;
+import com.qcloud.cos.model.ciModel.auditing.AuditingKeywordResponse;
+import com.qcloud.cos.model.ciModel.auditing.AuditingStrategyListResponse;
+import com.qcloud.cos.model.ciModel.auditing.AuditingStrategyResponse;
+import com.qcloud.cos.model.ciModel.auditing.AuditingTextLibResponse;
 import com.qcloud.cos.model.ciModel.auditing.BatchImageAuditingResponse;
 import com.qcloud.cos.model.ciModel.auditing.DocumentAuditingResponse;
 import com.qcloud.cos.model.ciModel.auditing.ImageAuditingResponse;
@@ -60,14 +43,22 @@ import com.qcloud.cos.model.ciModel.auditing.VideoAuditingResponse;
 import com.qcloud.cos.model.ciModel.auditing.WebpageAuditingResponse;
 import com.qcloud.cos.model.ciModel.bucket.DocBucketResponse;
 import com.qcloud.cos.model.ciModel.bucket.MediaBucketResponse;
+import com.qcloud.cos.model.ciModel.image.AutoTranslationBlockResponse;
+import com.qcloud.cos.model.ciModel.image.DetectFaceResponse;
+import com.qcloud.cos.model.ciModel.image.ImageInspectRequest;
 import com.qcloud.cos.model.ciModel.image.ImageLabelResponse;
 import com.qcloud.cos.model.ciModel.image.ImageLabelV2Response;
 import com.qcloud.cos.model.ciModel.image.ImageSearchResponse;
+import com.qcloud.cos.model.ciModel.image.ImageStyleResponse;
+import com.qcloud.cos.model.ciModel.job.BatchJobResponse;
 import com.qcloud.cos.model.ciModel.job.DocJobListResponse;
 import com.qcloud.cos.model.ciModel.job.DocJobResponse;
+import com.qcloud.cos.model.ciModel.job.FileProcessJobResponse;
 import com.qcloud.cos.model.ciModel.job.MediaJobResponse;
 import com.qcloud.cos.model.ciModel.job.MediaListJobResponse;
 import com.qcloud.cos.model.ciModel.mediaInfo.MediaInfoResponse;
+import com.qcloud.cos.model.ciModel.persistence.AIGameRecResponse;
+import com.qcloud.cos.model.ciModel.persistence.CIUploadResult;
 import com.qcloud.cos.model.ciModel.persistence.DetectCarResponse;
 import com.qcloud.cos.model.ciModel.queue.DocListQueueResponse;
 import com.qcloud.cos.model.ciModel.queue.MediaListQueueResponse;
@@ -88,10 +79,10 @@ public class Unmarshallers {
     /**
      * Unmarshaller for the ListBuckets XML response.
      */
-    public static final class ListBucketsUnmarshaller
-            implements Unmarshaller<List<Bucket>, InputStream> {
-        public List<Bucket> unmarshall(InputStream in) throws Exception {
-            return new XmlResponsesSaxParser().parseListMyBucketsResponse(in).getBuckets();
+    public static final class GetServiceUnmarshaller
+            implements Unmarshaller<ListBucketsResult, InputStream> {
+        public ListBucketsResult unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser().parseGetServiceResponse(in).getResult();
         }
     }
 
@@ -158,8 +149,8 @@ public class Unmarshallers {
             implements Unmarshaller<ObjectMetadata, InputStream> {
         public ObjectMetadata unmarshall(InputStream in) throws Exception {
             ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setCiUploadResult(new XmlResponsesSaxParser().parseImagePersistenceResponse(in)
-                    .getCiUploadResult());
+            CICommonUnmarshaller<CIUploadResult> unmarshaller = new CICommonUnmarshaller<>(CIUploadResult.class);
+            objectMetadata.setCiUploadResult(unmarshaller.unmarshall(in));
             return objectMetadata;
         }
     }
@@ -333,6 +324,17 @@ public class Unmarshallers {
         }
     }
 
+    public static final class BucketDomainCertificateUnmarshaller
+            implements Unmarshaller<BucketGetDomainCertificate, InputStream> {
+        public BucketGetDomainCertificate unmarshall(InputStream in) throws Exception {
+            if (in.available() == 0) {
+                return null;
+            }
+            return new XmlResponsesSaxParser().parseBucketDomainCertificateResponse(in)
+                    .getBucketDomainCertificate();
+        }
+    }
+
     public static final class BucketRefererConfigurationUnmarshaller
             implements Unmarshaller<BucketRefererConfiguration, InputStream> {
         public BucketRefererConfiguration unmarshall(InputStream in) throws Exception {
@@ -440,6 +442,14 @@ public class Unmarshallers {
         }
     }
 
+    public static final class ListBucketTieringConfigurationUnmarshaller
+            implements Unmarshaller<List<BucketIntelligentTieringConfiguration>, InputStream> {
+
+        public List<BucketIntelligentTieringConfiguration> unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser().parseListBucketIntelligentTierConfigurationsResponse(in).getConfigurations();
+        }
+    }
+
     public static final class SetObjectTaggingResponseUnmarshaller implements Unmarshaller<SetObjectTaggingResult, InputStream> {
 
         @Override
@@ -453,6 +463,28 @@ public class Unmarshallers {
         @Override
         public DeleteObjectTaggingResult unmarshall(InputStream in) throws Exception {
             return new DeleteObjectTaggingResult();
+        }
+    }
+
+    /**
+     * Unmarshaller for the BucketEncryption XML response.
+     */
+    public static final class BucketEncryptionConfigurationUnmarshaller implements
+            Unmarshaller<BucketEncryptionConfiguration, InputStream> {
+        public BucketEncryptionConfiguration unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser()
+                    .parseBucketEncryptionResponse(in).getBucketEncryptionConfiguration();
+        }
+    }
+
+    /**
+     * Unmarshaller for the BucketObjectLock XML response.
+     */
+    public static final class BucketObjectLockConfigurationUnmarshaller implements
+            Unmarshaller<BucketObjectLockConfiguration, InputStream> {
+        public BucketObjectLockConfiguration unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser()
+                    .parseBucketObjectLockConfigurationResponse(in).getBucketObjectLockConfiguration();
         }
     }
 
@@ -573,6 +605,15 @@ public class Unmarshallers {
         public MediaJobResponse unmarshall(InputStream in) throws Exception {
             return new XmlResponsesSaxParser()
                     .parseJobCreatResponse(in).getResponse();
+        }
+    }
+
+    public static final class BatchJobUnmarshaller
+            implements Unmarshaller<BatchJobResponse, InputStream> {
+
+        public BatchJobResponse unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser()
+                    .parseBatchJobResponse(in).getResponse();
         }
     }
 
@@ -805,6 +846,143 @@ public class Unmarshallers {
         public MediaWorkflowListResponse unmarshall(InputStream in) throws Exception {
             return new XmlResponsesSaxParser()
                     .parsetriggerWorkflowListResponse(in).getResponse();
+        }
+    }
+
+    public static final class GenerateQrcodeUnmarshaller
+            implements Unmarshaller<String, InputStream> {
+
+        public String unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser()
+                    .parseGenerateQrcodeResponse(in).getResponse();
+        }
+    }
+
+    public static final class getImageStyleUnmarshaller
+            implements Unmarshaller<ImageStyleResponse, InputStream> {
+
+        public ImageStyleResponse unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser()
+                    .parseGetImageStyleResponse(in).getResponse();
+        }
+    }
+
+    public static final class DecompressionResultUnmarshaller
+        implements Unmarshaller<DecompressionResult, InputStream> {
+
+        public DecompressionResult unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser().parseDecompressionResult(in)
+                .getDecompressionResult();
+        }
+    }
+
+    public static final class ListJobsResultUnmarshaller
+            implements Unmarshaller<ListJobsResult, InputStream> {
+
+        public ListJobsResult unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser().parseListJobsResult(in).getResult();
+        }
+    }
+
+    public static final class ReportBadCaseUnmarshaller
+            implements Unmarshaller<String, InputStream> {
+
+        public String unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser()
+                    .parseReportBadCase(in).getResponse();
+        }
+    }
+
+    public static final class FileProcessUnmarshaller
+            implements Unmarshaller<FileProcessJobResponse, InputStream> {
+
+        public FileProcessJobResponse unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser()
+                    .parseFileProcessResponse(in).getResponse();
+        }
+    }
+
+    public static final class AutoTranslationBlockUnmarshaller
+            implements Unmarshaller<AutoTranslationBlockResponse, InputStream> {
+
+        public AutoTranslationBlockResponse unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser()
+                    .parseAutoTranslationBlockResponse(in).getResponse();
+        }
+    }
+
+    public static final class DetectFaceUnmarshaller
+            implements Unmarshaller<DetectFaceResponse, InputStream> {
+
+        public DetectFaceResponse unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser()
+                    .parseDetectFaceResponse(in).getResponse();
+        }
+    }
+
+    public static final class AIGameRecUnmarshaller
+            implements Unmarshaller<AIGameRecResponse, InputStream> {
+
+        public AIGameRecResponse unmarshall(InputStream in) throws Exception {
+            return new XmlResponsesSaxParser()
+                    .parseAIGameRecResponse(in).getResponse();
+        }
+    }
+
+    public static final class AuditingStrategyUnmarshaller
+            implements Unmarshaller<AuditingStrategyResponse, InputStream> {
+
+        public AuditingStrategyResponse unmarshall(InputStream in) {
+            return new AuditingStrategyHandler().getResponse(in);
+        }
+    }
+    public static final class AuditingStrategyListUnmarshaller
+            implements Unmarshaller<AuditingStrategyListResponse, InputStream> {
+
+        public AuditingStrategyListResponse unmarshall(InputStream in) {
+            return new AuditingStrategyHandler().getResponseList(in);
+        }
+    }
+    public static final class AuditingTextLibUnmarshaller
+            implements Unmarshaller<AuditingTextLibResponse, InputStream> {
+
+        public AuditingTextLibResponse unmarshall(InputStream in) {
+            return new AuditingTextLibHandler().getResponse(in);
+        }
+    }
+
+    public static final class CICommonUnmarshaller<T> implements Unmarshaller<T, InputStream> {
+        private Class<T> tClass;
+
+        public CICommonUnmarshaller(Class<T> cls) {
+            this.tClass = cls;
+        }
+
+        public T unmarshall(InputStream in) {
+            return new CICommonHandler<T>().getResponse(in,tClass);
+        }
+    }
+
+    public static final class CICommonJsonUnmarshaller<T> implements Unmarshaller<T, InputStream> {
+        private Class<T> tClass;
+
+        public CICommonJsonUnmarshaller(Class<T> cls) {
+            this.tClass = cls;
+        }
+
+        public T unmarshall(InputStream in) throws IOException {
+            return new CICommonJsonResponseHandler<T>().getResponse(in,tClass);
+        }
+    }
+
+    public static class CIJsonUnmarshaller<T> implements Unmarshaller<T, InputStream>{
+        private Class<T> tClass;
+        public CIJsonUnmarshaller(Class<T> aClass) {
+            this.tClass = aClass;
+        }
+        @Override
+        public T unmarshall(InputStream in) throws Exception {
+            return new CIJsonHandler<T>().getResponse(in,tClass);
         }
     }
 }
